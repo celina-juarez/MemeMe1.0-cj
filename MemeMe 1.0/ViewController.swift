@@ -32,13 +32,16 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     //MARK: Life Cycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        topTextField.delegate = self
-        bottomTextField.delegate = self
+//
+//        topTextField.delegate = self
+//        bottomTextField.delegate = self
         
         //sets textFields default text
         topTextField.text = "TOP"
         bottomTextField.text = "BOTTOM"
+        
+        setupTextField(newText: topTextField, text: topTextField.text!)
+        setupTextField(newText: bottomTextField, text: bottomTextField.text!)
 
     }
     
@@ -51,12 +54,6 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         
         //share button won't be enabled until meme is completed
         checkForCompleteMeme()
-        
-        topTextField.defaultTextAttributes = memeTextAttributes
-        bottomTextField.defaultTextAttributes = memeTextAttributes
-        
-        topTextField.textAlignment = .center
-        bottomTextField.textAlignment = .center
         
         subscribeToKeyboardNotifications()
     }
@@ -120,6 +117,19 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         return keyboardSize.cgRectValue.height
     }
     
+    //Sets textfields default states
+    func setupTextField(newText: UITextField, text: String) {
+        newText.defaultTextAttributes = [
+            NSAttributedString.Key.strokeColor: UIColor.black,
+            NSAttributedString.Key.foregroundColor: UIColor.white,
+            NSAttributedString.Key.font: UIFont(name: "HelveticaNeue-CondensedBlack", size: 40)!,
+            NSAttributedString.Key.strokeWidth: -4.0
+        ]
+        newText.textAlignment = .center
+        newText.text = text
+        newText.delegate = self
+    }
+    
     //Creates the meme object
     func save() {
         let meme = Meme(topText: topTextField.text!, bottomText: bottomTextField.text!,originalImage: imageView.image!, memedImage: generateMemedImage())
@@ -155,19 +165,21 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         toolBar.isHidden = !toolBar.isHidden
     }
     
+    //Image picker controller for both camera and photo library
+    func getImageFromCameraOrLibrary(source: UIImagePickerController.SourceType) {
+        let imagePickerController = UIImagePickerController()
+        imagePickerController.delegate = self
+        imagePickerController.sourceType = source
+        self.present(imagePickerController, animated: true, completion: nil)
+    }
+    
     //MARK: Actions
     @IBAction func selectCamera(_ sender: Any) {
-        let imagePicker = UIImagePickerController()
-        imagePicker.delegate = self
-        imagePicker.sourceType = .camera
-        self.present(imagePicker, animated: true, completion: nil)
+        getImageFromCameraOrLibrary(source: .camera)
     }
     
     @IBAction func selectAlbum(_ sender: Any) {
-        let imagePicker = UIImagePickerController()
-        imagePicker.delegate = self
-        imagePicker.sourceType = .photoLibrary
-        self.present(imagePicker, animated: true, completion: nil)
+        getImageFromCameraOrLibrary(source: .photoLibrary)
     }
     
     @IBAction func selectShare(_ sender: Any) {
